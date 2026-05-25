@@ -1,0 +1,79 @@
+version: "3.9"
+
+services:
+  # ── Databases ───────────────────────────────────────────────────────────────
+  orders-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: orders_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+
+  inventory-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: inventory_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+
+  payments-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: payments_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5434:5432"
+
+  # ── Services ─────────────────────────────────────────────────────────────────
+  order-service:
+    build: ./order-service
+    command: python manage.py runserver 0.0.0.0:8001
+    volumes:
+      - ./order-service:/app
+    working_dir: /app
+    ports:
+      - "8001:8001"
+    environment:
+      DB_HOST: orders-db
+      DB_NAME: orders_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+    depends_on:
+      - orders-db
+
+  inventory-service:
+    build: ./inventory-service
+    command: python manage.py runserver 0.0.0.0:8002
+    volumes:
+      - ./inventory-service:/app
+    working_dir: /app
+    ports:
+      - "8002:8002"
+    environment:
+      DB_HOST: inventory-db
+      DB_NAME: inventory_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+    depends_on:
+      - inventory-db
+
+  payment-service:
+    build: ./payment-service
+    command: python manage.py runserver 0.0.0.0:8003
+    volumes:
+      - ./payment-service:/app
+    working_dir: /app
+    ports:
+      - "8003:8003"
+    environment:
+      DB_HOST: payments-db
+      DB_NAME: payments_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+    depends_on:
+      - payments-db

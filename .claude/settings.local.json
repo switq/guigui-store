@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem -Recurse -Name | Where-Object { $_ -notmatch \"__pycache__\" } | Sort-Object)"
+    ]
+  }
+}
