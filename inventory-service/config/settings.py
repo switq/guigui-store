@@ -22,5 +22,18 @@ DATABASES = {
     }
 }
 
+TEMPLATES = [
+    {
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+            ],
+        },
+    },
+]
+
 ROOT_URLCONF = "config.urls"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
