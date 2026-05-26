@@ -10,6 +10,11 @@ services:
       POSTGRES_PASSWORD: postgres
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   inventory-db:
     image: postgres:16-alpine
@@ -19,6 +24,11 @@ services:
       POSTGRES_PASSWORD: postgres
     ports:
       - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   payments-db:
     image: postgres:16-alpine
@@ -28,11 +38,16 @@ services:
       POSTGRES_PASSWORD: postgres
     ports:
       - "5434:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   # ── Services ─────────────────────────────────────────────────────────────────
   order-service:
     build: ./order-service
-    command: python manage.py runserver 0.0.0.0:8001
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8001"
     volumes:
       - ./order-service:/app
     working_dir: /app
@@ -44,11 +59,12 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres
     depends_on:
-      - orders-db
+      orders-db:
+        condition: service_healthy
 
   inventory-service:
     build: ./inventory-service
-    command: python manage.py runserver 0.0.0.0:8002
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8002"
     volumes:
       - ./inventory-service:/app
     working_dir: /app
@@ -60,11 +76,12 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres
     depends_on:
-      - inventory-db
+      inventory-db:
+        condition: service_healthy
 
   payment-service:
     build: ./payment-service
-    command: python manage.py runserver 0.0.0.0:8003
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8003"
     volumes:
       - ./payment-service:/app
     working_dir: /app
@@ -76,4 +93,5 @@ services:
       DB_USER: postgres
       DB_PASSWORD: postgres
     depends_on:
-      - payments-db
+      payments-db:
+        condition: service_healthy
